@@ -9,7 +9,7 @@
 *> Want to change languages? Try the search bar up the top.
 
 IDENTIFICATION DIVISION.
-PROGRAM-ID. SESIMPLES.
+PROGRAM-ID. SECOMPOSTO.
 DATA DIVISION.
     WORKING-STORAGE SECTION.
         01 WS-NOTA1  PIC 9(02)V99.
