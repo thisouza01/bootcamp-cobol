@@ -1,0 +1,43 @@
+*> Welcome to JDoodle!
+*>
+*> You can execute code here in 88 languages. Right now you’re in the COBOL IDE.
+*>
+*>  1. Click the orange Execute button ▶ to execute the sample code below and see how it works.
+*>  2. Want help writing or debugging code? Type a query into JDroid on the right hand side ---------------->
+*>  3. Try the menu buttons on the left. Save your file, share code with friends and open saved projects.
+*>
+*> Want to change languages? Try the search bar up the top.
+
+IDENTIFICATION DIVISION.
+PROGRAM-ID. SEENCADEADO.
+DATA DIVISION.
+    WORKING-STORAGE SECTION.
+        01 WS-NOTA1  PIC 9(02)V99.
+        01 WS-NOTA2  PIC 9(02)V99.
+        01 WS-MEDIA  PIC 9(02)V99.
+        01 WS-ANO    PIC 9(01).
+        
+PROCEDURE DIVISION.
+    DISPLAY "NOTA 1: ".
+    ACCEPT WS-NOTA1.
+    
+    DISPLAY "NOTA 2: ".
+    ACCEPT WS-NOTA2.
+    
+    COMPUTE WS-MEDIA = (WS-NOTA1 + WS-NOTA2) / 2.
+    
+    DISPLAY "MÉDIA: " WS-MEDIA.
+    
+    IF WS-MEDIA >= 7
+    DISPLAY "ANO QUE ESTUDA {1, 2, 3}: " WITH NO ADVANCING
+    ACCEPT WS-ANO
+    IF WS-ANO = 3
+        DISPLAY "DIPLOMADO!"
+    ELSE
+        DISPLAY "APROVADO!"
+    ELSE
+        DISPLAY "NOVA PROVA!"
+    END-IF.
+
+STOP RUN.
+
