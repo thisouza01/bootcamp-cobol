@@ -56,6 +56,9 @@
         <mxCell id="9pVsqj957UKyGrOGqYfS-13" value="VETOR[I]&amp;nbsp;&lt;div&gt;=&amp;nbsp;&lt;/div&gt;&lt;div&gt;VETOR[I + 1]&amp;nbsp;&lt;/div&gt;" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.decision;whiteSpace=wrap;fillColor=#ffe6cc;strokeColor=#d79b00;" parent="1" vertex="1">
           <mxGeometry x="305" y="484.5" width="150" height="135.5" as="geometry" />
         </mxCell>
+        <mxCell id="EjiQUUBvQNjEozO3apSi-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="9pVsqj957UKyGrOGqYfS-15" target="9pVsqj957UKyGrOGqYfS-17">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
         <mxCell id="9pVsqj957UKyGrOGqYfS-15" value="INVALIDO" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.display;whiteSpace=wrap;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="1" vertex="1">
           <mxGeometry x="330" y="700" width="100" height="60" as="geometry" />
         </mxCell>
