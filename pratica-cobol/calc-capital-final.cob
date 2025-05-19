@@ -21,7 +21,6 @@
        77  WS-CAPITAL-FIN      PIC 9(05)V99        VALUE ZEROS.
        77  WS-TX-JUROS         PIC 99V99           VALUE ZEROS.
        77  WS-MESES            PIC 99              VALUE ZEROS.
-       77  WS-CONT             PIC 99              VALUE 1.
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
@@ -49,8 +48,6 @@
        0210-PROCESSAR.
            COMPUTE WS-CAPITAL-FIN =
                    (WS-CAPITAL-FIN * WS-TX-JUROS) + WS-CAPITAL-FIN.
-
-           ADD 1 TO WS-CONT.
        0200-PROCESSAR-FIM.       EXIT.
       ******************************************************************
        0400-FINALIZAR            SECTION.
