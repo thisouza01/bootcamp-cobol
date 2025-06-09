@@ -15,26 +15,34 @@
       *
        INPUT-OUTPUT            SECTION.
        FILE-CONTROL.
-           SELECT CLIENTES ASSIGN TO "C:\teste\clientes.txt"
-              FILE STATUS IS FS-CLIENTES.
+           SELECT CLIENTES ASSIGN TO "C:/projeto-bootcamp/clientes.dat"
+               ORGANIZATION    IS INDEXED
+               ACCESS MODE     IS RANDOM
+               RECORD KEY      IS CHAVE-CLIENTES
+               FILE STATUS     IS FS-CLIENTES.
       ******************************************************************
        DATA                    DIVISION.
       *
        FILE                    SECTION.
        FD  CLIENTES.
        01  REG-CLIENTES.
-           05 REG-ID           PIC  9(04).
-           05 REG-NOME         PIC  A(20).
-           05 REG-TELEFONE     PIC  X(11).
+           05 CHAVE-CLIENTES.
+               10 REG-TELEFONE     PIC X(11).
+           05 REG-NOME             PIC A(30).
+           05 REG-EMAIL            PIC X(40).
       ******************************************************************
        WORKING-STORAGE         SECTION.
-       01  FS-CLIENTES         PIC 9(02) VALUE ZEROS.
-       01  WRK-MSG-ERRO        PIC X(30) VALUE SPACES.
+      *---> STATUS ARQUIVO
+       01  FS-CLIENTES             PIC X(02) VALUE SPACES.
 
-      *    ---> TELA
-       77  WK-OPCAO            PIC X(01) VALUE SPACES.
-       77  WK-TECLA            PIC X(01) VALUE SPACES.
-       77  WK-MODULO           PIC X(25) VALUE SPACES.
+      *---> ABENDS
+       77  WS-ABEND-CODE           PIC XX    VALUE SPACES.
+       77  WS-ABEND-MESSAGE        PIC X(30) VALUE SPACES.
+
+      *---> TELA
+       77  WK-OPCAO                PIC X(01) VALUE SPACES.
+       77  WK-TECLA                PIC X(01) VALUE SPACES.
+       77  WK-MODULO               PIC X(25) VALUE SPACES.
       *
        SCREEN                  SECTION.
        01  TELA.
@@ -45,12 +53,36 @@
                10 LINE 01 COLUMN 15 PIC X(20)
                   BACKGROUND-COLOR 5
                   FROM "SISTEMA DE CLIENTES".
-               10 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
-                  BACKGROUND-COLOR 1 FROM WK-MODULO.
-               10 LINE 05 COLUMN 15 PIC X(20)
+               10 LINE 05 COLUMN 15 PIC X(15)
                   BACKGROUND-COLOR 7.
-               10 LINE 14 COLUMN 15 PIC X(20)
+               10 LINE 14 COLUMN 15 PIC X(15)
                   BACKGROUND-COLOR 7.
+      *
+       01  TELA-INCLUSAO.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 1 FROM WK-MODULO.
+      *
+       01  TELA-CONSULTA.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 1 FROM WK-MODULO.
+      *
+       01  TELA-ALTERA.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 1 FROM WK-MODULO.
+      *
+       01  TELA-EXCLUI.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 1 FROM WK-MODULO.
+      *
+       01  TELA-RELATORIO.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 1 FROM WK-MODULO.
+      *
 
        01  MENU-PRINCIPAL.
            05 LINE 07 COLUMN 15 VALUE "1 - INCLUIR".
@@ -65,41 +97,70 @@
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
              PERFORM 0100-INICIALIZAR.
-             PERFORM 0200-PROCESSAR.
+             PERFORM 0200-PROCESSAR THRU 0200-PROCESSAR-FIM.
              PERFORM 0300-FINALIZAR.
 
              STOP RUN.
        0000-PRINCIPAL-FIM.     EXIT.
       ******************************************************************
-       0100-INICIALIZAR.
+       0100-INICIALIZAR        SECTION.
+           OPEN I-O CLIENTES.
+           IF FS-CLIENTES EQUAL "35"
+               OPEN OUTPUT CLIENTES
+               CLOSE CLIENTES
+               OPEN I-O CLIENTES
+           END-IF.
+
            DISPLAY TELA.
            ACCEPT  MENU-PRINCIPAL.
        0100-INICIALIZAR-FIM.   EXIT.
       ******************************************************************
-       0200-PROCESSAR.
+       0200-PROCESSAR          SECTION.
            EVALUATE WK-OPCAO
                WHEN 1
                    PERFORM 0210-INCLUIR
                WHEN 2
-                   CONTINUE
+                   PERFORM 0220-CONSULTAR
                WHEN 3
-                   CONTINUE
+                   PERFORM 0230-ALTERAR
                WHEN 4
-                   CONTINUE
+                   PERFORM 0240-EXCLUIR
                WHEN 5
-                   CONTINUE
+                   PERFORM 0250-RELATORIO
                WHEN OTHER
-                   IF WK-OPCAO NOT EQUAL "X" OR "x"
+                   IF FUNCTION UPPER-CASE(WK-OPCAO) NOT EQUAL "X"
                        DISPLAY "OPCAO INVALIDA!!" AT 1631
+                       FOREGROUND-COLOR 4
                    END-IF
            END-EVALUATE.
        0200-PROCESSAR-FIM.     EXIT.
       *
        0210-INCLUIR.
            MOVE "MODULO - INCLUSAO " TO WK-MODULO.
-           DISPLAY TELA.
+           DISPLAY TELA-INCLUSAO.
+           ACCEPT WK-TECLA AT 1620.
+      *
+       0220-CONSULTAR.
+           MOVE "MODULO - CONSULTA " TO WK-MODULO.
+           DISPLAY TELA-CONSULTA.
+           ACCEPT WK-TECLA AT 1620.
+      *
+       0230-ALTERAR.
+           MOVE "MODULO - ALTERACAO " TO WK-MODULO.
+           DISPLAY TELA-ALTERA.
+           ACCEPT WK-TECLA AT 1620.
+      *
+       0240-EXCLUIR.
+           MOVE "MODULO - EXCLUSAO " TO WK-MODULO.
+           DISPLAY TELA-EXCLUI.
+           ACCEPT WK-TECLA AT 1620.
+      *
+       0250-RELATORIO.
+           MOVE "MODULO - RELATORIO " TO WK-MODULO.
+           DISPLAY TELA-RELATORIO.
            ACCEPT WK-TECLA AT 1620.
       ******************************************************************
-       0300-FINALIZAR.
+       0300-FINALIZAR          SECTION.
 
        0300-FINALIZAR-FIM.     EXIT.
+      ******************************************************************
