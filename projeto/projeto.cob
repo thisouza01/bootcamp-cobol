@@ -27,7 +27,7 @@
        FD  CLIENTES.
        01  REG-CLIENTES.
            05 CHAVE-CLIENTES.
-               10 REG-TELEFONE     PIC X(11).
+               10 REG-TELEFONE     PIC 9(09).
            05 REG-NOME             PIC A(30).
            05 REG-EMAIL            PIC X(40).
       ******************************************************************
@@ -58,32 +58,6 @@
                10 LINE 14 COLUMN 15 PIC X(15)
                   BACKGROUND-COLOR 7.
       *
-       01  TELA-INCLUSAO.
-           05 BLANK SCREEN.
-           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
-               BACKGROUND-COLOR 1 FROM WK-MODULO.
-      *
-       01  TELA-CONSULTA.
-           05 BLANK SCREEN.
-           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
-               BACKGROUND-COLOR 1 FROM WK-MODULO.
-      *
-       01  TELA-ALTERA.
-           05 BLANK SCREEN.
-           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
-               BACKGROUND-COLOR 1 FROM WK-MODULO.
-      *
-       01  TELA-EXCLUI.
-           05 BLANK SCREEN.
-           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
-               BACKGROUND-COLOR 1 FROM WK-MODULO.
-      *
-       01  TELA-RELATORIO.
-           05 BLANK SCREEN.
-           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
-               BACKGROUND-COLOR 1 FROM WK-MODULO.
-      *
-
        01  MENU-PRINCIPAL.
            05 LINE 07 COLUMN 15 VALUE "1 - INCLUIR".
            05 LINE 08 COLUMN 15 VALUE "2 - CONSULTAR".
@@ -92,7 +66,42 @@
            05 LINE 11 COLUMN 15 VALUE "5 - RELATORIO".
            05 LINE 12 COLUMN 15 VALUE "X - SAIDA".
            05 LINE 16 COLUMN 15 VALUE "OPCAO........: ".
-           05 LINE 16 COLUMN 28 USING WK-OPCAO.
+           05 LINE 16 COLUMN 28 USING WK-OPCAO.                   
+      *
+       01  TELA-INCLUSAO.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 5 FROM WK-MODULO.
+      *         
+           05 CHAVE FOREGROUND-COLOR 3.
+               10 LINE 10 COLUMN 10 VALUE "TELEFONE ".
+               10 COLUMN PLUS 2 PIC 9(09) USING REG-TELEFONE
+                   BLANK WHEN ZEROS.
+           05 SS-DADOS.
+               10 LINE 11 COLUMN 10 VALUE "NOME.... ".
+               10 COLUMN PLUS 2 PIC X(30) USING REG-NOME.
+               10 LINE 12 COLUMN 10 VALUE "EMAIL... ".               
+               10 COLUMN PLUS 2 PIC X(40) USING REG-EMAIL.               
+      *
+       01  TELA-CONSULTA.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 5 FROM WK-MODULO.
+      *
+       01  TELA-ALTERA.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 5 FROM WK-MODULO.
+      *
+       01  TELA-EXCLUI.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 5 FROM WK-MODULO.
+      *
+       01  TELA-RELATORIO.
+           05 BLANK SCREEN.
+           05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
+               BACKGROUND-COLOR 5 FROM WK-MODULO.
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
@@ -110,10 +119,11 @@
                CLOSE CLIENTES
                OPEN I-O CLIENTES
            END-IF.
-
-           DISPLAY TELA.
-           ACCEPT  MENU-PRINCIPAL.
        0100-INICIALIZAR-FIM.   EXIT.
+      *
+       0110-MOSTRA-TELA-INICIAL.
+           DISPLAY TELA.
+           ACCEPT  MENU-PRINCIPAL.       
       ******************************************************************
        0200-PROCESSAR          SECTION.
            EVALUATE WK-OPCAO
@@ -137,8 +147,11 @@
       *
        0210-INCLUIR.
            MOVE "MODULO - INCLUSAO " TO WK-MODULO.
-           DISPLAY TELA-INCLUSAO.
-           ACCEPT WK-TECLA AT 1620.
+           ACCEPT TELA-INCLUSAO.
+      *---> GRAVA REGISTRO
+           WRITE REG-CLIENTES.
+           
+           
       *
        0220-CONSULTAR.
            MOVE "MODULO - CONSULTA " TO WK-MODULO.
