@@ -86,6 +86,7 @@
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
+           05 LINE 08 COLUMN 10 VALUE "INSIRA CHAVE PARA A CONSULTA".    
       *
        01  TELA-ALTERA.
            05 BLANK SCREEN.
@@ -101,13 +102,13 @@
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
-      * 
+      *
        01  MOSTRA-ERRO.
            05 MSG-ERRO.
                10 LINE 16 COLUMN 10 FROM WK-ABEND-MESSAGE
                FOREGROUND-COLOR 4.
                10 COLUMN PLUS 2 PIC X(01) USING WK-TECLA.
-               
+
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
@@ -150,7 +151,7 @@
                            FOREGROUND-COLOR 4
                        END-IF
                END-EVALUATE
-           END-PERFORM.        
+           END-PERFORM.
        0200-PROCESSAR-FIM.     EXIT.
       *
        0210-INCLUIR.
@@ -167,29 +168,43 @@
                    FOREGROUND-COLOR 2
                    ACCEPT WK-TECLA
                    PERFORM 0110-MOSTRA-TELA-INICIAL
-           END-WRITE.               
+           END-WRITE.
 
       *
        0220-CONSULTAR.
            MOVE "MODULO - CONSULTA " TO WK-MODULO.
            DISPLAY TELA-CONSULTA.
-           ACCEPT WK-TECLA AT 1620.
-      *
+           ACCEPT CHAVE.
+      *---> LE REGISTTRO
+           READ CLIENTES
+               INVALID KEY
+                   MOVE "CLIENTE NAO ENCONTRADO!" TO WK-ABEND-MESSAGE
+                   ACCEPT MOSTRA-ERRO
+                   IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "X"
+                       PERFORM 0110-MOSTRA-TELA-INICIAL
+                   END-IF                   
+               NOT INVALID KEY
+                   DISPLAY SS-DADOS 
+                   DISPLAY "CONTINUAR? (X - NAO): "
+                   FOREGROUND-COLOR 2 AT 1420
+                   ACCEPT WK-TECLA AT 1442
+                   IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "X"
+                       PERFORM 0110-MOSTRA-TELA-INICIAL
+                   END-IF    
+           END-READ.        
+      *        
        0230-ALTERAR.
            MOVE "MODULO - ALTERACAO " TO WK-MODULO.
-           DISPLAY TELA-ALTERA.
-           ACCEPT WK-TECLA AT 1620.
+           ACCEPT TELA-ALTERA.
       *
        0240-EXCLUIR.
            MOVE "MODULO - EXCLUSAO " TO WK-MODULO.
-           DISPLAY TELA-EXCLUI.
-           ACCEPT WK-TECLA AT 1620.
+           ACCEPT TELA-EXCLUI.
       *
        0250-RELATORIO.
            MOVE "MODULO - RELATORIO " TO WK-MODULO.
-           DISPLAY TELA-RELATORIO.
-           ACCEPT WK-TECLA AT 1620.
-      ******************************************************************       
+           ACCEPT TELA-RELATORIO.
+      ******************************************************************
        1000-FINALIZAR          SECTION.
            CLOSE CLIENTES.
        1000-FINALIZAR-FIM.     EXIT.
