@@ -36,8 +36,7 @@
        01  FS-CLIENTES             PIC X(02) VALUE SPACES.
 
       *---> ABENDS
-       77  WS-ABEND-CODE           PIC XX    VALUE SPACES.
-       77  WS-ABEND-MESSAGE        PIC X(30) VALUE SPACES.
+       77  WK-ABEND-MESSAGE        PIC X(25) VALUE SPACES.
 
       *---> TELA
        77  WK-OPCAO                PIC X(01) VALUE SPACES.
@@ -66,13 +65,13 @@
            05 LINE 11 COLUMN 15 VALUE "5 - RELATORIO".
            05 LINE 12 COLUMN 15 VALUE "X - SAIDA".
            05 LINE 16 COLUMN 15 VALUE "OPCAO........: ".
-           05 LINE 16 COLUMN 28 USING WK-OPCAO.                   
+           05 LINE 16 COLUMN 28 USING WK-OPCAO.
       *
        01  TELA-INCLUSAO.
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
-      *         
+      *
            05 CHAVE FOREGROUND-COLOR 3.
                10 LINE 10 COLUMN 10 VALUE "TELEFONE ".
                10 COLUMN PLUS 2 PIC 9(09) USING REG-TELEFONE
@@ -80,8 +79,8 @@
            05 SS-DADOS.
                10 LINE 11 COLUMN 10 VALUE "NOME.... ".
                10 COLUMN PLUS 2 PIC X(30) USING REG-NOME.
-               10 LINE 12 COLUMN 10 VALUE "EMAIL... ".               
-               10 COLUMN PLUS 2 PIC X(40) USING REG-EMAIL.               
+               10 LINE 12 COLUMN 10 VALUE "EMAIL... ".
+               10 COLUMN PLUS 2 PIC X(40) USING REG-EMAIL.
       *
        01  TELA-CONSULTA.
            05 BLANK SCREEN.
@@ -102,12 +101,19 @@
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
+      * 
+       01  MOSTRA-ERRO.
+           05 MSG-ERRO.
+               10 LINE 10 COLUMN 32 USING WK-ABEND-MESSAGE
+               FOREGROUND-COLOR 4.
+               10 COLUMN PLUS 2 PIC X(01) USING WK-TECLA.
+               
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
              PERFORM 0100-INICIALIZAR.
              PERFORM 0200-PROCESSAR THRU 0200-PROCESSAR-FIM.
-             PERFORM 0300-FINALIZAR.
+             PERFORM 1000-FINALIZAR.
 
              STOP RUN.
        0000-PRINCIPAL-FIM.     EXIT.
@@ -123,7 +129,7 @@
       *
        0110-MOSTRA-TELA-INICIAL.
            DISPLAY TELA.
-           ACCEPT  MENU-PRINCIPAL.       
+           ACCEPT  MENU-PRINCIPAL.
       ******************************************************************
        0200-PROCESSAR          SECTION.
            EVALUATE WK-OPCAO
@@ -149,9 +155,12 @@
            MOVE "MODULO - INCLUSAO " TO WK-MODULO.
            ACCEPT TELA-INCLUSAO.
       *---> GRAVA REGISTRO
-           WRITE REG-CLIENTES.
-           
-           
+           WRITE REG-CLIENTES
+               INVALID KEY
+                   MOVE "CLIENTE JA EXISTE!" TO WK-ABEND-MESSAGE
+                   DISPLAY MOSTRA-ERRO
+           END-WRITE.               
+
       *
        0220-CONSULTAR.
            MOVE "MODULO - CONSULTA " TO WK-MODULO.
@@ -172,8 +181,7 @@
            MOVE "MODULO - RELATORIO " TO WK-MODULO.
            DISPLAY TELA-RELATORIO.
            ACCEPT WK-TECLA AT 1620.
-      ******************************************************************
-       0300-FINALIZAR          SECTION.
-
-       0300-FINALIZAR-FIM.     EXIT.
-      ******************************************************************
+      ******************************************************************       
+       1000-FINALIZAR          SECTION.
+           CLOSE CLIENTES.
+       1000-FINALIZAR-FIM.     EXIT.
