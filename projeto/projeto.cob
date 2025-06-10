@@ -104,7 +104,7 @@
       * 
        01  MOSTRA-ERRO.
            05 MSG-ERRO.
-               10 LINE 10 COLUMN 32 USING WK-ABEND-MESSAGE
+               10 LINE 16 COLUMN 10 FROM WK-ABEND-MESSAGE
                FOREGROUND-COLOR 4.
                10 COLUMN PLUS 2 PIC X(01) USING WK-TECLA.
                
@@ -132,23 +132,25 @@
            ACCEPT  MENU-PRINCIPAL.
       ******************************************************************
        0200-PROCESSAR          SECTION.
-           EVALUATE WK-OPCAO
-               WHEN 1
-                   PERFORM 0210-INCLUIR
-               WHEN 2
-                   PERFORM 0220-CONSULTAR
-               WHEN 3
-                   PERFORM 0230-ALTERAR
-               WHEN 4
-                   PERFORM 0240-EXCLUIR
-               WHEN 5
-                   PERFORM 0250-RELATORIO
-               WHEN OTHER
-                   IF FUNCTION UPPER-CASE(WK-OPCAO) NOT EQUAL "X"
-                       DISPLAY "OPCAO INVALIDA!!" AT 1631
-                       FOREGROUND-COLOR 4
-                   END-IF
-           END-EVALUATE.
+           PERFORM UNTIL FUNCTION UPPER-CASE(WK-OPCAO) EQUAL "X"
+               EVALUATE WK-OPCAO
+                   WHEN 1
+                       PERFORM 0210-INCLUIR
+                   WHEN 2
+                       PERFORM 0220-CONSULTAR
+                   WHEN 3
+                       PERFORM 0230-ALTERAR
+                   WHEN 4
+                       PERFORM 0240-EXCLUIR
+                   WHEN 5
+                       PERFORM 0250-RELATORIO
+                   WHEN OTHER
+                       IF FUNCTION UPPER-CASE(WK-OPCAO) NOT EQUAL "X"
+                           DISPLAY "OPCAO INVALIDA!!" AT 1631
+                           FOREGROUND-COLOR 4
+                       END-IF
+               END-EVALUATE
+           END-PERFORM.        
        0200-PROCESSAR-FIM.     EXIT.
       *
        0210-INCLUIR.
@@ -158,7 +160,13 @@
            WRITE REG-CLIENTES
                INVALID KEY
                    MOVE "CLIENTE JA EXISTE!" TO WK-ABEND-MESSAGE
-                   DISPLAY MOSTRA-ERRO
+                   ACCEPT MOSTRA-ERRO
+                   PERFORM 0110-MOSTRA-TELA-INICIAL
+               NOT INVALID KEY
+                   DISPLAY "CADASTRADO!" AT 1032
+                   FOREGROUND-COLOR 2
+                   ACCEPT WK-TECLA
+                   PERFORM 0110-MOSTRA-TELA-INICIAL
            END-WRITE.               
 
       *
