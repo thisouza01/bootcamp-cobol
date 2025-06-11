@@ -134,9 +134,9 @@
       ******************************************************************
        0200-PROCESSAR          SECTION.
            PERFORM UNTIL FUNCTION UPPER-CASE(WK-OPCAO) EQUAL "X"
-      *---> ZERA CHAVE DE ACESSO     
+      *---> ZERA CHAVE DE ACESSO
                MOVE ZEROS TO CHAVE-CLIENTES
-               
+
                EVALUATE WK-OPCAO
                    WHEN 1
                        PERFORM 0210-INCLUIR
@@ -172,7 +172,6 @@
                    ACCEPT WK-TECLA
                    PERFORM 0110-MOSTRA-TELA-INICIAL
            END-WRITE.
-
       *
        0220-CONSULTAR.
            MOVE "MODULO - CONSULTA " TO WK-MODULO.
@@ -195,6 +194,26 @@
        0230-ALTERAR.
            MOVE "MODULO - ALTERACAO " TO WK-MODULO.
            ACCEPT TELA-ALTERA.
+           ACCEPT CHAVE.
+      *---> LE REGISTRO
+           READ CLIENTES
+           IF FS-CLIENTES EQUAL "00"
+               ACCEPT SS-DADOS
+      *---> REGRAVA REGISTRO
+               REWRITE REG-CLIENTES
+               IF FS-CLIENTES EQUAL "00"
+                   DISPLAY "REGISTRO ALTERADO!"
+                   FOREGROUND-COLOR 2 AT 1032
+                   ACCEPT WK-TECLA AT 1051
+                   PERFORM 0110-MOSTRA-TELA-INICIAL
+               ELSE
+                   MOVE "REGISTRO NAO ALTERADO" TO WK-ABEND-MESSAGE
+                   ACCEPT MOSTRA-ERRO
+               END-IF
+           ELSE
+               MOVE "CLIENTE NAO ENCONTRADO!" TO WK-ABEND-MESSAGE
+               ACCEPT MOSTRA-ERRO
+           END-IF.
       *
        0240-EXCLUIR.
            MOVE "MODULO - EXCLUSAO " TO WK-MODULO.
@@ -212,25 +231,26 @@
                        FOREGROUND-COLOR 2 AT 1420
                    ACCEPT WK-TECLA AT 1462
                    IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL " "
-                       DISPLAY "TEM CERTEZA? (S / N): " 
+                       DISPLAY "TEM CERTEZA? (S / N): "
                            FOREGROUND-COLOR 2 AT 1520
                        ACCEPT WK-TECLA AT 1543
                        IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "S"
+      *---> APAGA REGISTRO
                            DELETE CLIENTES
                                INVALID KEY
-                                   MOVE "NAO EXCLUIDO!" 
+                                   MOVE "NAO EXCLUIDO!"
                                                    TO WK-ABEND-MESSAGE
                                    ACCEPT MOSTRA-ERRO
                                NOT INVALID KEY
                                    DISPLAY "APAGADO!"
                                        FOREGROUND-COLOR 2 AT 1045
-                           END-DELETE        
+                           END-DELETE
+                       END-IF
                        ACCEPT WK-TECLA
                    ELSE
                        PERFORM 0300-VOLTA-TELA
-                   END-IF    
+                   END-IF
            END-READ.
-      *           
       *
        0250-RELATORIO.
            MOVE "MODULO - RELATORIO " TO WK-MODULO.
