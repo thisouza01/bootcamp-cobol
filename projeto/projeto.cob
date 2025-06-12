@@ -28,8 +28,8 @@
        01  REG-CLIENTES.
            05 CHAVE-CLIENTES.
                10 REG-TELEFONE     PIC 9(09).
-           05 REG-NOME             PIC A(20).
-           05 REG-EMAIL            PIC X(30).
+           05 REG-NOME             PIC A(30).
+           05 REG-EMAIL            PIC X(40).
       ******************************************************************
        WORKING-STORAGE         SECTION.
       *---> STATUS ARQUIVO
@@ -44,6 +44,7 @@
        77  WK-MODULO               PIC X(25) VALUE SPACES.
        77  WK-CONTALINHA           PIC 99    VALUE ZEROS.
        77  WK-QTREGISTROS          PIC 99    VALUE ZEROS.
+       77  WK-LINHA                PIC 99    VALUE ZEROS.
       *
        SCREEN                  SECTION.
        01  TELA.
@@ -54,8 +55,6 @@
                10 LINE 01 COLUMN 15 PIC X(20)
                   BACKGROUND-COLOR 5
                   FROM "SISTEMA DE CLIENTES".
-               10 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
-                  BACKGROUND-COLOR 1 FROM WK-MODULO.
       *
        01  MENU-PRINCIPAL.
            05 LINE 07 COLUMN 15 VALUE "1 - INCLUIR".
@@ -105,8 +104,8 @@
            05 LINE 04 COLUMN 10 VALUE "TELEFONE   NOME                "&
                "            EMAIL" FOREGROUND-COLOR 3.
            05 LINE 05 COLUMN 10 VALUE "---------  --------------------"&
-            "----------  ------------------------".    
-      * 
+            "----------  ------------------------".
+      *
        01  MOSTRA-ERRO.
            05 MSG-ERRO.
                10 LINE 16 COLUMN 10 FROM WK-ABEND-MESSAGE
@@ -276,26 +275,25 @@
                    DISPLAY TELA-RELATORIO
                    PERFORM UNTIL FS-CLIENTES EQUAL "10"
                        ADD 1 TO WK-QTREGISTROS
-                       DISPLAY REG-TELEFONE "  "
-                               REG-NOME "  " 
-                               REG-EMAIL
-      *---> LE PROXIMO REGISTRO 
-                       READ CLIENTES NEXT   
+                       DISPLAY REG-CLIENTES AT LINE WK-LINHA COLUMN 10
+      *---> LE PROXIMO REGISTRO
+                       READ CLIENTES NEXT
                        ADD 1 TO WK-CONTALINHA
                        IF WK-CONTALINHA EQUAL 5
-                           MOVE "PRESSIONE ALGUMA TECLA" 
+                           MOVE "PRESSIONE ALGUMA TECLA"
                                                TO WK-ABEND-MESSAGE
                            ACCEPT WK-TECLA
                            MOVE ZEROS TO WK-CONTALINHA
                            MOVE "MODULO - RELATORIO " TO WK-MODULO
-                           DISPLAY TELA 
+                           DISPLAY TELA
                            DISPLAY TELA-RELATORIO
-                       END-IF    
-                   END-PERFORM            
-           END-READ.       
+                       END-IF
+                   END-PERFORM
+           END-READ.
            MOVE "REGISTROS LIDOS" TO WK-ABEND-MESSAGE.
            MOVE WK-QTREGISTROS TO WK-ABEND-MESSAGE(17:05)
            ACCEPT MOSTRA-ERRO.
+           PERFORM 0110-MOSTRA-TELA-INICIAL.
       *
        0300-VOLTA-TELA.
            IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "X"
