@@ -39,9 +39,10 @@
        77  WK-ABEND-MESSAGE        PIC X(25) VALUE SPACES.
 
       *---> TELA
-       77  WK-OPCAO                PIC X(01) VALUE SPACES.
-       77  WK-TECLA                PIC X(01) VALUE SPACES.
+       77  WK-OPCAO                PIC X     VALUE SPACES.
+       77  WK-TECLA                PIC X     VALUE SPACES.
        77  WK-MODULO               PIC X(25) VALUE SPACES.
+       77  WK-LINHA                PIC 9     VALUE 6.
       *
        SCREEN                  SECTION.
        01  TELA.
@@ -102,6 +103,17 @@
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
+           05 LINE 04 COLUMN 10 VALUE "TELEFONE   NOME                "&
+               "            EMAIL" FOREGROUND-COLOR 3.
+           05 LINE 05 COLUMN 10 VALUE "---------  --------------------"&
+            "----------  ------------------------".    
+           05 SS-RELATORIO.
+               10 LINE PLUS 1 COLUMN 10 PIC 9(09) FROM REG-TELEFONE.
+               10 COLUMN 22 PIC X(30) FROM REG-NOME.
+               10 COLUMN 55 PIC X(40) FROM REG-EMAIL.
+           05 LINE 22 COLUMN 10 VALUE "PRESSIONE QUALQUER TECLA " &
+                                   "PARA CONTINUAR"
+                                   FOREGROUND-COLOR 2.
       *
        01  MOSTRA-ERRO.
            05 MSG-ERRO.
@@ -136,6 +148,7 @@
            PERFORM UNTIL FUNCTION UPPER-CASE(WK-OPCAO) EQUAL "X"
       *---> ZERA CHAVE DE ACESSO
                MOVE ZEROS TO CHAVE-CLIENTES
+               MOVE SPACES TO REG-NOME, REG-EMAIL
 
                EVALUATE WK-OPCAO
                    WHEN 1
@@ -257,25 +270,39 @@
        0250-RELATORIO.
            MOVE "MODULO - RELATORIO " TO WK-MODULO.
            ACCEPT TELA-RELATORIO.
-           MOVE 111111111 TO REG-TELEFONE.
+           MOVE ZEROS TO REG-TELEFONE.
+           MOVE 6 TO WK-LINHA.
       *---> COMEÇA ARQUIVO NESSA CHAVE
-           START CLIENTES KEY EQUAL REG-TELEFONE.
+           START CLIENTES KEY NOT LESS THAN REG-TELEFONE.
       *---> LE REGISTRO
-           READ CLIENTES
-               INVALID KEY
-                   MOVE "REGISTRO NAO ENCONTRADO" TO WK-ABEND-MESSAGE
-                   ACCEPT MOSTRA-ERRO
-               NOT INVALID KEY
-                   DISPLAY "   RELATORIO DE CLIENTES   "
-                   DISPLAY "=-------------------------="
-                   DISPLAY REG-TELEFONE " "
-                           REG-NOME     " "
-                           REG-EMAIL
-                   READ CLIENTES NEXT
-                   DISPLAY REG-TELEFONE " "
-                           REG-NOME     " "
-                           REG-EMAIL
-           END-READ.
+           PERFORM UNTIL FS-CLIENTES NOT EQUAL "00"
+               READ CLIENTES NEXT
+                   AT END
+                       CONTINUE
+                   NOT AT END
+                       IF WK-LINHA > 20
+                           DISPLAY "PRESSIONE QUALQUER TECLA PARA "&
+                               "CONTINUAR" 
+                               FOREGROUND-COLOR 2 AT 2301
+                           ACCEPT WK-TECLA AT 2265
+                           DISPLAY TELA-RELATORIO
+                           MOVE 6 TO WK-LINHA
+                       END-IF
+                    
+                       DISPLAY SS-RELATORIO AT LINE WK-LINHA
+                       ADD 1 TO WK-LINHA
+               END-READ
+           END-PERFORM.
+    
+           IF FS-CLIENTES = "10"
+               DISPLAY "FIM DO RELATORIO" FOREGROUND-COLOR 3 AT 2410
+           ELSE
+               MOVE "ERRO AO LER ARQUIVO" TO WK-ABEND-MESSAGE
+               ACCEPT MOSTRA-ERRO
+           END-IF.
+    
+           ACCEPT WK-TECLA AT 2335.
+           PERFORM 0110-MOSTRA-TELA-INICIAL.
       *
        0300-VOLTA-TELA.
            IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "X"
