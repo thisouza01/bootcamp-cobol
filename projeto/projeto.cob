@@ -17,7 +17,7 @@
        FILE-CONTROL.
            SELECT CLIENTES ASSIGN TO "C:/projeto-bootcamp/clientes.dat"
                ORGANIZATION    IS INDEXED
-               ACCESS MODE     IS RANDOM
+               ACCESS MODE     IS DYNAMIC
                RECORD KEY      IS CHAVE-CLIENTES
                FILE STATUS     IS FS-CLIENTES.
       ******************************************************************
@@ -244,6 +244,8 @@
                                NOT INVALID KEY
                                    DISPLAY "APAGADO!"
                                        FOREGROUND-COLOR 2 AT 1045
+                                   ACCEPT WK-TECLA AT 1055
+                                   PERFORM 0110-MOSTRA-TELA-INICIAL
                            END-DELETE
                        END-IF
                        ACCEPT WK-TECLA
@@ -255,6 +257,25 @@
        0250-RELATORIO.
            MOVE "MODULO - RELATORIO " TO WK-MODULO.
            ACCEPT TELA-RELATORIO.
+           MOVE 111111111 TO REG-TELEFONE.
+      *---> COMEÇA ARQUIVO NESSA CHAVE
+           START CLIENTES KEY EQUAL REG-TELEFONE.
+      *---> LE REGISTRO
+           READ CLIENTES
+               INVALID KEY
+                   MOVE "REGISTRO NAO ENCONTRADO" TO WK-ABEND-MESSAGE
+                   ACCEPT MOSTRA-ERRO
+               NOT INVALID KEY
+                   DISPLAY "   RELATORIO DE CLIENTES   "
+                   DISPLAY "=-------------------------="
+                   DISPLAY REG-TELEFONE " "
+                           REG-NOME     " "
+                           REG-EMAIL
+                   READ CLIENTES NEXT
+                   DISPLAY REG-TELEFONE " "
+                           REG-NOME     " "
+                           REG-EMAIL
+           END-READ.
       *
        0300-VOLTA-TELA.
            IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "X"
