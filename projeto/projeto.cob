@@ -36,7 +36,7 @@
        01  FS-CLIENTES             PIC X(02) VALUE SPACES.
 
       *---> ABENDS
-       77  WK-ABEND-MESSAGE        PIC X(30) VALUE SPACES.
+       77  WK-ABEND-MESSAGE        PIC X(40) VALUE SPACES.
 
       *---> TELA
        77  WK-OPCAO                PIC X     VALUE SPACES.
@@ -44,7 +44,7 @@
        77  WK-MODULO               PIC X(25) VALUE SPACES.
        77  WK-CONTALINHA           PIC 99    VALUE ZEROS.
        77  WK-QTREGISTROS          PIC 99    VALUE ZEROS.
-       77  WK-LINHA                PIC 99    VALUE ZEROS.  
+       77  WK-LINHA                PIC 99    VALUE ZEROS.
       *
        SCREEN                  SECTION.
        01  TELA.
@@ -85,7 +85,8 @@
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
-           05 LINE 08 COLUMN 10 VALUE "INSIRA CHAVE PARA A CONSULTA".
+           05 LINE 08 COLUMN 10 VALUE "INSIRA CHAVE PARA A CONSULTA"
+               FOREGROUND-COLOR 3.
       *
        01  TELA-ALTERA.
            05 BLANK SCREEN.
@@ -105,14 +106,16 @@
                "            EMAIL" FOREGROUND-COLOR 3.
            05 LINE 05 COLUMN 10 VALUE "---------  --------------------"&
             "----------  ------------------------".
+           05 LINE 11 COLUMN 10 VALUE "---------  --------------------"&
+            "----------  ------------------------".
       *
        01  LINHA-RELATORIO.
-           05 FILLER LINE WK-LINHA COLUMN 10  PIC 9(09) 
-                                                   FROM REG-TELEFONE.                                                
-           05 FILLER LINE WK-LINHA COLUMN 21  PIC X(30) 
+           05 FILLER LINE WK-LINHA COLUMN 10  PIC 9(09)
+                                                   FROM REG-TELEFONE.
+           05 FILLER LINE WK-LINHA COLUMN 21  PIC X(30)
                                                    FROM REG-NOME.
-           05 FILLER LINE WK-LINHA COLUMN 53  PIC X(40) 
-                                                   FROM REG-EMAIL.                                          
+           05 FILLER LINE WK-LINHA COLUMN 53  PIC X(40)
+                                                   FROM REG-EMAIL.
       *
        01  MOSTRA-ERRO.
            05 MSG-ERRO.
@@ -196,10 +199,10 @@
                INVALID KEY
                    MOVE "CLIENTE NAO ENCONTRADO!" TO WK-ABEND-MESSAGE
                    ACCEPT MOSTRA-ERRO
-                   PERFORM 0300-VOLTA-TELA
+                   PERFORM 0110-MOSTRA-TELA-INICIAL
                NOT INVALID KEY
                    DISPLAY SS-DADOS
-                   DISPLAY "PARA CONTINUAR APERTE 'ENTER' SENAO 'X'): "
+                   DISPLAY "PARA VER OUTRO APERTE 'ENTER' SENAO 'X': "
                    FOREGROUND-COLOR 2 AT 1420
                    ACCEPT WK-TECLA AT 1462
                    PERFORM 0300-VOLTA-TELA
@@ -227,6 +230,7 @@
            ELSE
                MOVE "CLIENTE NAO ENCONTRADO!" TO WK-ABEND-MESSAGE
                ACCEPT MOSTRA-ERRO
+               PERFORM 0110-MOSTRA-TELA-INICIAL
            END-IF.
       *
        0240-EXCLUIR.
@@ -238,10 +242,10 @@
                INVALID KEY
                    MOVE "CLIENTE NAO ENCONTRADO!" TO WK-ABEND-MESSAGE
                    ACCEPT MOSTRA-ERRO
-                   PERFORM 0300-VOLTA-TELA
+                   PERFORM 0110-MOSTRA-TELA-INICIAL
                NOT INVALID KEY
                    DISPLAY SS-DADOS
-                   DISPLAY "PARA EXCLUIR APERTE 'ENTER' SENAO 'X'): "
+                   DISPLAY "PARA EXCLUIR APERTE 'ENTER': "
                        FOREGROUND-COLOR 2 AT 1420
                    ACCEPT WK-TECLA AT 1462
                    IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL " "
@@ -262,9 +266,11 @@
                                    PERFORM 0110-MOSTRA-TELA-INICIAL
                            END-DELETE
                        END-IF
-                       ACCEPT WK-TECLA
                    ELSE
-                       PERFORM 0300-VOLTA-TELA
+                       DISPLAY "NAO EXCLUIDO!" FOREGROUND-COLOR 4
+                                                           AT 1032
+                       ACCEPT WK-TECLA
+                       PERFORM 0110-MOSTRA-TELA-INICIAL
                    END-IF
            END-READ.
       *
@@ -272,6 +278,7 @@
            MOVE "MODULO - RELATORIO " TO WK-MODULO.
            DISPLAY TELA.
            MOVE 000000001 TO REG-TELEFONE.
+           MOVE ZEROS TO WK-QTREGISTROS, WK-CONTALINHA
       *---> POSICIONA CHAVE
            START CLIENTES KEY EQUAL REG-TELEFONE.
       *---> LE REGISTRO
@@ -289,10 +296,10 @@
                        READ CLIENTES NEXT
                        ADD 1 TO WK-LINHA
                        ADD 1 TO WK-CONTALINHA
-                       IF WK-CONTALINHA EQUAL 5
-                           MOVE "PRESSIONE ALGUMA TECLA"
+                       IF WK-CONTALINHA GREATER THAN 5
+                           MOVE "PRESSIONE ALGUMA TECLA PARA CONTINUAR"
                                                TO WK-ABEND-MESSAGE
-                           ACCEPT WK-TECLA
+                           ACCEPT MOSTRA-ERRO
                            MOVE ZEROS TO WK-CONTALINHA
                            MOVE 6 TO WK-LINHA
                            MOVE "MODULO - RELATORIO " TO WK-MODULO
