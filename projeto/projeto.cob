@@ -44,7 +44,7 @@
        77  WK-MODULO               PIC X(25) VALUE SPACES.
        77  WK-CONTALINHA           PIC 99    VALUE ZEROS.
        77  WK-QTREGISTROS          PIC 99    VALUE ZEROS.
-       77  WK-LINHA                PIC 99    VALUE ZEROS.
+       77  WK-LINHA                PIC 99    VALUE ZEROS.  
       *
        SCREEN                  SECTION.
        01  TELA.
@@ -105,6 +105,14 @@
                "            EMAIL" FOREGROUND-COLOR 3.
            05 LINE 05 COLUMN 10 VALUE "---------  --------------------"&
             "----------  ------------------------".
+      *
+       01  LINHA-RELATORIO.
+           05 FILLER LINE WK-LINHA COLUMN 10  PIC 9(09) 
+                                                   FROM REG-TELEFONE.                                                
+           05 FILLER LINE WK-LINHA COLUMN 21  PIC X(30) 
+                                                   FROM REG-NOME.
+           05 FILLER LINE WK-LINHA COLUMN 53  PIC X(40) 
+                                                   FROM REG-EMAIL.                                          
       *
        01  MOSTRA-ERRO.
            05 MSG-ERRO.
@@ -273,17 +281,20 @@
                    ACCEPT MOSTRA-ERRO
                NOT INVALID KEY
                    DISPLAY TELA-RELATORIO
+                   MOVE 06 TO WK-LINHA
                    PERFORM UNTIL FS-CLIENTES EQUAL "10"
                        ADD 1 TO WK-QTREGISTROS
-                       DISPLAY REG-CLIENTES AT LINE WK-LINHA COLUMN 10
+                       DISPLAY LINHA-RELATORIO
       *---> LE PROXIMO REGISTRO
                        READ CLIENTES NEXT
+                       ADD 1 TO WK-LINHA
                        ADD 1 TO WK-CONTALINHA
                        IF WK-CONTALINHA EQUAL 5
                            MOVE "PRESSIONE ALGUMA TECLA"
                                                TO WK-ABEND-MESSAGE
                            ACCEPT WK-TECLA
                            MOVE ZEROS TO WK-CONTALINHA
+                           MOVE 6 TO WK-LINHA
                            MOVE "MODULO - RELATORIO " TO WK-MODULO
                            DISPLAY TELA
                            DISPLAY TELA-RELATORIO
