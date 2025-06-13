@@ -20,6 +20,10 @@
                ACCESS MODE     IS DYNAMIC
                RECORD KEY      IS CHAVE-CLIENTES
                FILE STATUS     IS FS-CLIENTES.
+      *         
+           SELECT RELATO ASSIGN TO "C:/projeto-bootcamp/relato.txt"
+               ORGANIZATION    IS LINE SEQUENTIAL
+               FILE STATUS     IS FS-RELATO.
       ******************************************************************
        DATA                    DIVISION.
       *
@@ -30,10 +34,15 @@
                10 REG-TELEFONE     PIC 9(09).
            05 REG-NOME             PIC A(30).
            05 REG-EMAIL            PIC X(40).
+           
+       FD  RELATO.   
+       01  REG-RELATO.
+           05 RELATO-DADOS         PIC X(79).
       ******************************************************************
        WORKING-STORAGE         SECTION.
       *---> STATUS ARQUIVO
        01  FS-CLIENTES             PIC X(02) VALUE SPACES.
+       01  FS-RELATO               PIC X(02) VALUE SPACES.
 
       *---> ABENDS
        77  WK-ABEND-MESSAGE        PIC X(40) VALUE SPACES.
@@ -45,6 +54,14 @@
        77  WK-CONTALINHA           PIC 99    VALUE ZEROS.
        77  WK-QTREGISTROS          PIC 99    VALUE ZEROS.
        77  WK-LINHA                PIC 99    VALUE ZEROS.
+       
+      *---> DATA
+       01  DATA-ATUAL.
+           05 DIA                  PIC 99    VALUE ZEROS.
+           05 FILLER               PIC X     VALUE "/".
+           05 MES                  PIC 99    VALUE ZEROS.
+           05 FILLER               PIC X     VALUE "/".
+           05 ANO                  PIC 9999  VALUE ZEROS.
       *
        SCREEN                  SECTION.
        01  TELA.
@@ -55,14 +72,19 @@
                10 LINE 01 COLUMN 15 PIC X(20)
                   BACKGROUND-COLOR 5
                   FROM "SISTEMA DE CLIENTES".
+               10 LINE 03 COLUMN 02           VALUE "DATA: " 
+                   FOREGROUND-COLOR 7.
+               10 LINE 03 COLUMN 08 PIC X(10) USING DATA-ATUAL
+                   FOREGROUND-COLOR 7.
       *
        01  MENU-PRINCIPAL.
            05 LINE 07 COLUMN 15 VALUE "1 - INCLUIR".
            05 LINE 08 COLUMN 15 VALUE "2 - CONSULTAR".
            05 LINE 09 COLUMN 15 VALUE "3 - ALTERAR".
            05 LINE 10 COLUMN 15 VALUE "4 - EXCLUIR".
-           05 LINE 11 COLUMN 15 VALUE "5 - RELATORIO".
-           05 LINE 12 COLUMN 15 VALUE "X - SAIDA".
+           05 LINE 11 COLUMN 15 VALUE "5 - RELATORIO EM TELA".
+           05 LINE 12 COLUMN 15 VALUE "6 - RELATORIO EM DISCO".
+           05 LINE 13 COLUMN 15 VALUE "X - SAIDA".
            05 LINE 16 COLUMN 15 VALUE "OPCAO........: ".
            05 LINE 16 COLUMN 28 USING WK-OPCAO.
       *
@@ -70,6 +92,7 @@
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
+           05 LINE 08 COLUMN 10 VALUE "INSIRA OS DADOS PARA O CADASTRO".               
       *
            05 CHAVE FOREGROUND-COLOR 3.
                10 LINE 10 COLUMN 10 VALUE "TELEFONE ".
@@ -85,18 +108,19 @@
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
-           05 LINE 08 COLUMN 10 VALUE "INSIRA CHAVE PARA A CONSULTA"
-               FOREGROUND-COLOR 3.
+           05 LINE 08 COLUMN 10 VALUE "INSIRA CHAVE PARA A CONSULTA".
       *
        01  TELA-ALTERA.
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
+           05 LINE 08 COLUMN 10 VALUE "INSIRA CHAVE PARA A ALTERAR".
       *
        01  TELA-EXCLUI.
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
                BACKGROUND-COLOR 5 FROM WK-MODULO.
+           05 LINE 08 COLUMN 10 VALUE "INSIRA CHAVE PARA A EXCLUIR".          
       *
        01  TELA-RELATORIO.
            05 BLANK SCREEN.
@@ -143,6 +167,9 @@
        0100-INICIALIZAR-FIM.   EXIT.
       *
        0110-MOSTRA-TELA-INICIAL.
+           MOVE FUNCTION CURRENT-DATE(1:4) TO ANO
+           MOVE FUNCTION CURRENT-DATE(5:2) TO MES
+           MOVE FUNCTION CURRENT-DATE(7:2) TO DIA
            DISPLAY TELA.
            ACCEPT  MENU-PRINCIPAL.
       ******************************************************************
@@ -150,6 +177,7 @@
            PERFORM UNTIL FUNCTION UPPER-CASE(WK-OPCAO) EQUAL "X"
       *---> ZERA CHAVE DE ACESSO
                MOVE ZEROS TO CHAVE-CLIENTES
+      *---> ZERA SS-DADOS             
                MOVE SPACES TO REG-NOME, REG-EMAIL
 
                EVALUATE WK-OPCAO
@@ -162,7 +190,10 @@
                    WHEN 4
                        PERFORM 0240-EXCLUIR
                    WHEN 5
-                       PERFORM 0250-RELATORIO
+                       PERFORM 0250-RELATORIO-TELA
+                   WHEN 6
+                       OPEN OUTPUT RELATO                       
+                       PERFORM 0260-RELATORIO-DISCO
                    WHEN OTHER
                        IF FUNCTION UPPER-CASE(WK-OPCAO) NOT EQUAL "X"
                            DISPLAY "OPCAO INVALIDA!!" AT 1631
@@ -216,22 +247,30 @@
            READ CLIENTES
            IF FS-CLIENTES EQUAL "00"
                ACCEPT SS-DADOS
+               DISPLAY "PARA ALTERAR APERTE 'ENTER': "
+                       FOREGROUND-COLOR 2 AT 1415
+                   ACCEPT WK-TECLA AT 1462
+                   IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL " "
+                       DISPLAY "TEM CERTEZA? (S / N): "
+                           FOREGROUND-COLOR 2 AT 1515
+                       ACCEPT WK-TECLA AT 1538
+                       IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "S"               
       *---> REGRAVA REGISTRO
-               REWRITE REG-CLIENTES
-               IF FS-CLIENTES EQUAL "00"
-                   DISPLAY "REGISTRO ALTERADO!"
-                   FOREGROUND-COLOR 2 AT 1032
-                   ACCEPT WK-TECLA AT 1051
-                   PERFORM 0110-MOSTRA-TELA-INICIAL
-               ELSE
-                   MOVE "REGISTRO NAO ALTERADO" TO WK-ABEND-MESSAGE
-                   ACCEPT MOSTRA-ERRO
-               END-IF
-           ELSE
-               MOVE "CLIENTE NAO ENCONTRADO!" TO WK-ABEND-MESSAGE
-               ACCEPT MOSTRA-ERRO
-               PERFORM 0110-MOSTRA-TELA-INICIAL
-           END-IF.
+                           REWRITE REG-CLIENTES
+                           IF FS-CLIENTES EQUAL "00"
+                               DISPLAY "REGISTRO ALTERADO!"
+                               FOREGROUND-COLOR 2 AT 1032
+                               ACCEPT WK-TECLA AT 1051
+                               PERFORM 0110-MOSTRA-TELA-INICIAL
+                           END-IF
+                       ELSE  
+                           MOVE "REGISTRO NAO ALTERADO"
+                               TO WK-ABEND-MESSAGE
+                           ACCEPT MOSTRA-ERRO 
+                           PERFORM 0110-MOSTRA-TELA-INICIAL                           
+                       END-IF
+                    END-IF   
+           END-IF.            
       *
        0240-EXCLUIR.
            MOVE "MODULO - EXCLUSAO " TO WK-MODULO.
@@ -274,7 +313,7 @@
                    END-IF
            END-READ.
       *
-       0250-RELATORIO.
+       0250-RELATORIO-TELA.
            MOVE "MODULO - RELATORIO " TO WK-MODULO.
            DISPLAY TELA.
            MOVE 000000001 TO REG-TELEFONE.
@@ -313,6 +352,38 @@
            ACCEPT MOSTRA-ERRO.
            PERFORM 0110-MOSTRA-TELA-INICIAL.
       *
+       0260-RELATORIO-DISCO.
+           MOVE "MODULO - RELATORIO " TO WK-MODULO.
+           DISPLAY TELA.
+           MOVE 000000001 TO REG-TELEFONE.
+           MOVE ZEROS TO WK-QTREGISTROS, WK-CONTALINHA
+      *---> POSICIONA CHAVE
+           START CLIENTES KEY EQUAL REG-TELEFONE.
+      *---> LE REGISTRO
+           READ CLIENTES
+               INVALID KEY
+                   MOVE "NAO ENCONTRADO!" TO WK-ABEND-MESSAGE
+                   ACCEPT MOSTRA-ERRO
+               NOT INVALID KEY  
+                   PERFORM UNTIL FS-CLIENTES EQUAL "10"
+                       ADD 1 TO WK-QTREGISTROS
+                       MOVE REG-CLIENTES TO REG-RELATO
+                       WRITE REG-RELATO
+                       IF FS-RELATO NOT EQUAL "00"
+                           MOVE "ERRO AO GRAVAR RELATORIO" 
+                                           TO WK-ABEND-MESSAGE
+                           ACCEPT MOSTRA-ERRO
+                           PERFORM 0110-MOSTRA-TELA-INICIAL
+                       END-IF
+                       READ CLIENTES NEXT
+                   END-PERFORM
+           END-READ.
+           DISPLAY "GRAVADO COM SUCESSO!" AT 1020 FOREGROUND-COLOR 2.   
+           MOVE "REGISTROS LIDOS" TO WK-ABEND-MESSAGE.
+           MOVE WK-QTREGISTROS TO WK-ABEND-MESSAGE(17:05).
+           ACCEPT MOSTRA-ERRO.
+           PERFORM 0110-MOSTRA-TELA-INICIAL.               
+      *            
        0300-VOLTA-TELA.
            IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "X"
                PERFORM 0110-MOSTRA-TELA-INICIAL
@@ -320,4 +391,5 @@
       ******************************************************************
        1000-FINALIZAR          SECTION.
            CLOSE CLIENTES.
+           CLOSE RELATO.
        1000-FINALIZAR-FIM.     EXIT.
