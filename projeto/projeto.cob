@@ -182,7 +182,7 @@
 
                EVALUATE WK-OPCAO
                    WHEN 1
-                       PERFORM 0210-INCLUIR
+                       CALL "INCLUIR"
                    WHEN 2
                        PERFORM 0220-CONSULTAR
                    WHEN 3
