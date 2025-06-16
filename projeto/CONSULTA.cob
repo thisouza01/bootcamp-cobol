@@ -60,19 +60,15 @@
                10 LINE 12 COLUMN 10 VALUE "EMAIL... ".
                10 COLUMN PLUS 2 PIC X(40) USING REG-EMAIL.
       *
-       01  MOSTRA-ERRO.
-           05 MSG-ERRO.
-               10 LINE 16 COLUMN 10 FROM WK-ABEND-MESSAGE
-               FOREGROUND-COLOR 4.
-               10 COLUMN PLUS 2 PIC X(01) USING WK-TECLA.
+           COPY "ERROR.cpy".
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
              PERFORM 0100-INICIALIZAR.
-             PERFORM 0220-CONSULTAR UNTIL 
+             PERFORM 0220-CONSULTAR UNTIL
                                FUNCTION UPPER-CASE(WK-TECLA)EQUAL "X".
              PERFORM 1000-FINALIZAR.
-             
+
              GOBACK.
        0000-PRINCIPAL-FIM.     EXIT.
       ******************************************************************
@@ -92,18 +88,18 @@
       *---> LE REGISTRO
            READ CLIENTES
                INVALID KEY
-                   MOVE "CLIENTE NAO ENCONTRADO!" 
+                   MOVE "CLIENTE NAO ENCONTRADO!"
                                                TO WK-ABEND-MESSAGE
                    ACCEPT MOSTRA-ERRO
-                   DISPLAY TELA-CONSULTA                      
+                   DISPLAY TELA-CONSULTA
                NOT INVALID KEY
                    DISPLAY SS-DADOS
                    DISPLAY "PARA VER OUTRO APERTE 'ENTER' SENAO 'X': "
                    FOREGROUND-COLOR 2 AT 1420
                    ACCEPT WK-TECLA AT 1462
                    MOVE SPACES TO REG-NOME REG-EMAIL
-                   MOVE ZEROS TO CHAVE-CLIENTES                       
-           END-READ.                    
+                   MOVE ZEROS TO CHAVE-CLIENTES
+           END-READ.
       ******************************************************************
        1000-FINALIZAR          SECTION.
            CLOSE CLIENTES.
