@@ -61,11 +61,7 @@
                10 LINE 12 COLUMN 10 VALUE "EMAIL... ".
                10 COLUMN PLUS 2 PIC X(40) USING REG-EMAIL.
       *
-       01  MOSTRA-ERRO.
-           05 MSG-ERRO.
-               10 LINE 16 COLUMN 10 FROM WK-ABEND-MESSAGE
-               FOREGROUND-COLOR 4.
-               10 COLUMN PLUS 2 PIC X(01) USING WK-TECLA.
+           COPY "ERROR.cpy".
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
@@ -73,7 +69,7 @@
              PERFORM 0200-ALTERAR.
              PERFORM 1000-FINALIZAR.
 
-             STOP RUN.
+             GOBACK.
        0000-PRINCIPAL-FIM.     EXIT.
       ******************************************************************
        0100-INICIALIZAR        SECTION.
@@ -85,38 +81,65 @@
            END-IF.
        0100-INICIALIZAR-FIM.   EXIT.
       ******************************************************************
-       0200-ALTERAR.
-           MOVE "MODULO - ALTERACAO " TO WK-MODULO.
-           ACCEPT TELA-ALTERA.
-           ACCEPT CHAVE.
+       0200-ALTERAR            SECTION.
+           MOVE "MODULO - ALTERACAO" TO WK-MODULO
+           PERFORM UNTIL WK-OPCAO = "N"
+               DISPLAY TELA-ALTERA
+               ACCEPT CHAVE
+               IF REG-TELEFONE = ZEROS
+                   EXIT PERFORM
+               END-IF
       *---> LE REGISTRO
-           READ CLIENTES
-           IF FS-CLIENTES EQUAL "00"
-               ACCEPT SS-DADOS
-               DISPLAY "PARA ALTERAR APERTE 'ENTER': "
-                       FOREGROUND-COLOR 2 AT 1415
-                   ACCEPT WK-TECLA AT 1462
-                   IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL " "
-                       DISPLAY "TEM CERTEZA? (S / N): "
-                           FOREGROUND-COLOR 2 AT 1515
-                       ACCEPT WK-TECLA AT 1538
-                       IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "S"
-      *---> REGRAVA REGISTRO
-                           REWRITE REG-CLIENTES
-                           IF FS-CLIENTES EQUAL "00"
-                               DISPLAY "REGISTRO ALTERADO!"
-                               FOREGROUND-COLOR 2 AT 1032
-                               ACCEPT WK-TECLA AT 1051
-                               GOBACK
-                           END-IF
-                       ELSE
-                           MOVE "REGISTRO NAO ALTERADO"
-                               TO WK-ABEND-MESSAGE
-                           ACCEPT MOSTRA-ERRO
-                           GOBACK
+               READ CLIENTES
+               EVALUATE TRUE
+                   WHEN FS-CLIENTES = "00"
+                       ACCEPT SS-DADOS
+                       DISPLAY "PARA ALTERAR APERTE 'ENTER': "
+                        FOREGROUND-COLOR 2 AT 1415
+                       ACCEPT WK-TECLA AT 1462
+
+                       IF WK-TECLA = SPACE
+                           PERFORM 0300-CONFIRMA-ALTERACAO
                        END-IF
-                    END-IF
-           END-IF.
+
+                   WHEN FS-CLIENTES = "23"
+                       MOVE "REGISTRO NAO ENCONTRADO"
+                                               TO WK-ABEND-MESSAGE
+                       DISPLAY MOSTRA-ERRO
+                       ACCEPT WK-TECLA
+
+                   WHEN OTHER
+                       MOVE "ERRO AO LER ARQUIVO" TO WK-ABEND-MESSAGE
+                       DISPLAY MOSTRA-ERRO
+                       ACCEPT WK-TECLA
+               END-EVALUATE
+      *--> LIMPA CAMPO
+               MOVE ZEROS TO CHAVE-CLIENTES
+               MOVE SPACES TO REG-NOME, REG-EMAIL
+           END-PERFORM.
+       0200-ALTERAR-FIM. EXIT.
+
+       0300-CONFIRMA-ALTERACAO SECTION.
+           DISPLAY "TEM CERTEZA? (S/N): " FOREGROUND-COLOR 2 AT 1515
+           ACCEPT WK-OPCAO AT 1538
+
+           IF FUNCTION UPPER-CASE(WK-OPCAO) = "S"
+               REWRITE REG-CLIENTES
+               EVALUATE TRUE
+                   WHEN FS-CLIENTES = "00"
+                       DISPLAY "REGISTRO ALTERADO!"
+                        FOREGROUND-COLOR 2 AT 1032
+                   WHEN OTHER
+                       MOVE "ERRO AO ALTERAR REGISTRO"
+                                           TO WK-ABEND-MESSAGE
+               END-EVALUATE
+               ACCEPT WK-TECLA AT 1051
+           ELSE
+               MOVE "ALTERACAO CANCELADA" TO WK-ABEND-MESSAGE
+           END-IF
+           DISPLAY MOSTRA-ERRO
+           ACCEPT WK-TECLA.
+           0300-CONFIRMA-ALTERACAO-FIM. EXIT.
       ******************************************************************
        1000-FINALIZAR          SECTION.
            CLOSE CLIENTES.
