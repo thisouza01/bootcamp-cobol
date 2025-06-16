@@ -43,40 +43,8 @@
        77  WK-OPCAO                PIC X     VALUE SPACES.
        77  WK-TECLA                PIC X     VALUE SPACES.
        77  WK-MODULO               PIC X(25) VALUE SPACES.
-
-      *---> DATA
-       01  DATA-ATUAL.
-           05 DIA                  PIC 99    VALUE ZEROS.
-           05 FILLER               PIC X     VALUE "/".
-           05 MES                  PIC 99    VALUE ZEROS.
-           05 FILLER               PIC X     VALUE "/".
-           05 ANO                  PIC 9999  VALUE ZEROS.
-      *
+      ******************************************************************
        SCREEN                  SECTION.
-       01  TELA.
-           05 LIMPA-TELA.
-               10 BLANK SCREEN.
-               10 LINE 01 COLUMN 01 PIC X(20) ERASE EOL
-                  BACKGROUND-COLOR 5.
-               10 LINE 01 COLUMN 15 PIC X(20)
-                  BACKGROUND-COLOR 5
-                  FROM "SISTEMA DE CLIENTES".
-               10 LINE 03 COLUMN 02           VALUE "DATA: "
-                   FOREGROUND-COLOR 7.
-               10 LINE 03 COLUMN 08 PIC X(10) USING DATA-ATUAL
-                   FOREGROUND-COLOR 7.
-      *
-       01  MENU-PRINCIPAL.
-           05 LINE 07 COLUMN 15 VALUE "1 - INCLUIR".
-           05 LINE 08 COLUMN 15 VALUE "2 - CONSULTAR".
-           05 LINE 09 COLUMN 15 VALUE "3 - ALTERAR".
-           05 LINE 10 COLUMN 15 VALUE "4 - EXCLUIR".
-           05 LINE 11 COLUMN 15 VALUE "5 - RELATORIO EM TELA".
-           05 LINE 12 COLUMN 15 VALUE "6 - RELATORIO EM DISCO".
-           05 LINE 13 COLUMN 15 VALUE "X - SAIDA".
-           05 LINE 16 COLUMN 15 VALUE "OPCAO........: ".
-           05 LINE 16 COLUMN 28 USING WK-OPCAO.
-      *
        01  TELA-INCLUSAO.
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
@@ -116,13 +84,6 @@
                OPEN I-O CLIENTES
            END-IF.
        0100-INICIALIZAR-FIM.   EXIT.
-      *
-       0110-MOSTRA-TELA-INICIAL.
-           MOVE FUNCTION CURRENT-DATE(1:4) TO ANO
-           MOVE FUNCTION CURRENT-DATE(5:2) TO MES
-           MOVE FUNCTION CURRENT-DATE(7:2) TO DIA
-           DISPLAY TELA.
-           ACCEPT  MENU-PRINCIPAL.
       ******************************************************************
        0210-INCLUIR.
            MOVE "MODULO - INCLUSAO " TO WK-MODULO.
@@ -132,12 +93,16 @@
                INVALID KEY
                    MOVE "CLIENTE JA EXISTE!" TO WK-ABEND-MESSAGE
                    ACCEPT MOSTRA-ERRO
-                   PERFORM 0110-MOSTRA-TELA-INICIAL
+                   GOBACK
                NOT INVALID KEY
                    DISPLAY "CADASTRADO!" AT 1032
                    FOREGROUND-COLOR 2
                    ACCEPT WK-TECLA
-                   PERFORM 0110-MOSTRA-TELA-INICIAL
+      *---> ZERA CHAVE DE ACESSO
+                   MOVE ZEROS TO CHAVE-CLIENTES
+      *---> ZERA SS-DADOS
+                   MOVE SPACES TO REG-NOME, REG-EMAIL
+                   GOBACK
            END-WRITE.
       ******************************************************************
        1000-FINALIZAR          SECTION.
