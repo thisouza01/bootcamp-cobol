@@ -73,16 +73,8 @@
                10 LINE 01 COLUMN 15 PIC X(20)
                   BACKGROUND-COLOR 5
                   FROM "SISTEMA DE CLIENTES".
-               10 LINE 03 COLUMN 02           VALUE "DATA: "
-                   FOREGROUND-COLOR 7.
-               10 LINE 03 COLUMN 08 PIC X(10) USING DATA-ATUAL
-                   FOREGROUND-COLOR 7.
       *
-       01  MOSTRA-ERRO.
-           05 MSG-ERRO.
-               10 LINE 16 COLUMN 10 FROM WK-ABEND-MESSAGE
-               FOREGROUND-COLOR 4.
-               10 COLUMN PLUS 2 PIC X(01) USING WK-TECLA.
+           COPY "ERROR.cpy".
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
@@ -90,7 +82,7 @@
              PERFORM 0200-RELATORIO-DISCO.
              PERFORM 1000-FINALIZAR.
 
-             STOP RUN.
+             GOBACK.
        0000-PRINCIPAL-FIM.     EXIT.
       ******************************************************************
        0100-INICIALIZAR        SECTION.
@@ -106,9 +98,11 @@
            MOVE "MODULO - RELATORIO DISCO" TO WK-MODULO.
            DISPLAY TELA.
            MOVE 000000001 TO REG-TELEFONE.
-           MOVE ZEROS TO WK-QTREGISTROS, WK-CONTALINHA
+           MOVE ZEROS TO WK-QTREGISTROS, WK-CONTALINHA.
+
       *---> POSICIONA CHAVE
            START CLIENTES KEY EQUAL REG-TELEFONE.
+
       *---> LE REGISTRO
            READ CLIENTES
                INVALID KEY
@@ -116,25 +110,38 @@
                    ACCEPT MOSTRA-ERRO
                NOT INVALID KEY
                    OPEN OUTPUT RELATO
-                   PERFORM UNTIL FS-CLIENTES EQUAL "10"
-                       ADD 1 TO WK-QTREGISTROS
-                       MOVE REG-CLIENTES TO REG-RELATO
-                       WRITE REG-RELATO
-                       IF FS-RELATO NOT EQUAL "00"
-                           MOVE "ERRO AO GRAVAR RELATORIO"
-                                           TO WK-ABEND-MESSAGE
+                   IF FS-RELATO NOT = "00"
+                       MOVE "ERRO AO ABRIR ARQUIVO RELATO"
+                                                     TO WK-ABEND-MESSAGE
+                       ACCEPT MOSTRA-ERRO
+                   ELSE
+                       PERFORM UNTIL FS-CLIENTES EQUAL "10"
+                           ADD 1 TO WK-QTREGISTROS
+                           MOVE REG-CLIENTES TO REG-RELATO
+                           WRITE REG-RELATO
+                           IF FS-RELATO NOT EQUAL "00"
+                               MOVE "ERRO AO GRAVAR RELATORIO"
+                                                     TO WK-ABEND-MESSAGE
+                               ACCEPT MOSTRA-ERRO
+                               EXIT PERFORM
+                           END-IF
+                           READ CLIENTES NEXT
+                       END-PERFORM
+
+                       IF FS-RELATO = "00" AND FS-CLIENTES = "10"
+                           DISPLAY "GRAVADO COM SUCESSO!"
+                                   AT 1020 FOREGROUND-COLOR 2
+                           MOVE "REGISTROS LIDOS" TO WK-ABEND-MESSAGE
+                           MOVE WK-QTREGISTROS TO
+                                               WK-ABEND-MESSAGE(17:05)
                            ACCEPT MOSTRA-ERRO
-                           GOBACK
                        END-IF
-                       READ CLIENTES NEXT
-                   END-PERFORM
+                   END-IF
            END-READ.
-           DISPLAY "GRAVADO COM SUCESSO!" AT 1020 FOREGROUND-COLOR 2.
-           MOVE "REGISTROS LIDOS" TO WK-ABEND-MESSAGE.
-           MOVE WK-QTREGISTROS TO WK-ABEND-MESSAGE(17:05).
-           ACCEPT MOSTRA-ERRO.
-           GOBACK.
+
+           PERFORM 1000-FINALIZAR.
       ******************************************************************
        1000-FINALIZAR          SECTION.
            CLOSE CLIENTES.
+           CLOSE RELATO.
        1000-FINALIZAR-FIM.     EXIT.
