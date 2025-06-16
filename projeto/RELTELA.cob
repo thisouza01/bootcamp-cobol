@@ -21,10 +21,6 @@
                ACCESS MODE     IS SEQUENTIAL
                RECORD KEY      IS CHAVE-CLIENTES
                FILE STATUS     IS FS-CLIENTES.
-      *
-           SELECT RELATO ASSIGN TO "C:/projeto-bootcamp/relato.txt"
-               ORGANIZATION    IS LINE SEQUENTIAL
-               FILE STATUS     IS FS-RELATO.
       ******************************************************************
        DATA                    DIVISION.
       *
@@ -35,10 +31,6 @@
                10 REG-TELEFONE     PIC 9(09).
            05 REG-NOME             PIC A(30).
            05 REG-EMAIL            PIC X(40).
-
-       FD  RELATO.
-       01  REG-RELATO.
-           05 RELATO-DADOS         PIC X(79).
       ******************************************************************
        WORKING-STORAGE         SECTION.
       *---> STATUS ARQUIVO
@@ -65,19 +57,7 @@
            05 ANO                  PIC 9999  VALUE ZEROS.
       ******************************************************************
        SCREEN                  SECTION.
-       01  TELA.
-           05 LIMPA-TELA.
-               10 BLANK SCREEN.
-               10 LINE 01 COLUMN 01 PIC X(20) ERASE EOL
-                  BACKGROUND-COLOR 5.
-               10 LINE 01 COLUMN 15 PIC X(20)
-                  BACKGROUND-COLOR 5
-                  FROM "SISTEMA DE CLIENTES".
-               10 LINE 03 COLUMN 02           VALUE "DATA: "
-                   FOREGROUND-COLOR 7.
-               10 LINE 03 COLUMN 08 PIC X(10) USING DATA-ATUAL
-                   FOREGROUND-COLOR 7.
-      *
+
        01  TELA-RELATORIO.
            05 BLANK SCREEN.
            05 LINE 02 COLUMN 01 PIC X(25) ERASE EOL
@@ -97,11 +77,7 @@
            05 FILLER LINE WK-LINHA COLUMN 53  PIC X(40)
                                                    FROM REG-EMAIL.
       *
-       01  MOSTRA-ERRO.
-           05 MSG-ERRO.
-               10 LINE 16 COLUMN 10 FROM WK-ABEND-MESSAGE
-               FOREGROUND-COLOR 4.
-               10 COLUMN PLUS 2 PIC X(01) USING WK-TECLA.
+           COPY "ERROR.cpy".
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
@@ -109,7 +85,7 @@
              PERFORM 0200-RELATORIO-TELA.
              PERFORM 1000-FINALIZAR.
 
-             STOP RUN.
+             GOBACK.
        0000-PRINCIPAL-FIM.     EXIT.
       ******************************************************************
        0100-INICIALIZAR        SECTION.
@@ -123,7 +99,7 @@
       ******************************************************************
        0200-RELATORIO-TELA.
            MOVE "MODULO - RELATORIO TELA" TO WK-MODULO.
-           DISPLAY TELA.
+           DISPLAY TELA-RELATORIO.
            MOVE 000000001 TO REG-TELEFONE.
            MOVE ZEROS TO WK-QTREGISTROS, WK-CONTALINHA
       *---> POSICIONA CHAVE
@@ -143,14 +119,13 @@
                        READ CLIENTES NEXT
                        ADD 1 TO WK-LINHA
                        ADD 1 TO WK-CONTALINHA
-                       IF WK-CONTALINHA GREATER THAN 5
+                       IF WK-CONTALINHA EQUAL 5
                            MOVE "PRESSIONE ALGUMA TECLA PARA CONTINUAR"
                                                TO WK-ABEND-MESSAGE
                            ACCEPT MOSTRA-ERRO
                            MOVE ZEROS TO WK-CONTALINHA
                            MOVE 6 TO WK-LINHA
                            MOVE "MODULO - RELATORIO " TO WK-MODULO
-                           DISPLAY TELA
                            DISPLAY TELA-RELATORIO
                        END-IF
                    END-PERFORM
@@ -158,6 +133,7 @@
            MOVE "REGISTROS LIDOS" TO WK-ABEND-MESSAGE.
            MOVE WK-QTREGISTROS TO WK-ABEND-MESSAGE(17:05)
            ACCEPT MOSTRA-ERRO.
+           PERFORM 1000-FINALIZAR.
            GOBACK.
       ******************************************************************
        1000-FINALIZAR          SECTION.
