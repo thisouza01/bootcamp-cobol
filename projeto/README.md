@@ -90,7 +90,7 @@ O programa apresenta um menu com as seguintes opções:
 
 ## Lógica do Programa (Procedural)
 
-O programa segue uma lógica estruturada por módulos, utilizando nomes de parágrafos para dividir o controle e facilitar a manutenção. Abaixo está a descrição dos principais blocos da `PROCEDURE DIVISION`:
+O programa segue uma lógica estruturada por módulos, utilizando nomes de parágrafos para dividir o controle e facilitar a manutenção. Abaixo está a descrição dos principais blocos da `MODULARIZAÇÂO`:
 
 ### 0100-INICIO
 - Responsável pela abertura dos arquivos (`clientes.dat`, `relato.txt`)
@@ -102,37 +102,37 @@ O programa segue uma lógica estruturada por módulos, utilizando nomes de pará
 - Captura a escolha do usuário e redireciona para a rotina correspondente
 - Verifica opções válidas e trata a opção de saída (`X`)
 
-### 0210-INCLUIR
+### INCLUIR
 - Recebe os dados do cliente via tela
 - Valida se o telefone já existe no arquivo
 - Se não existir, grava o novo registro (`WRITE`)
 - Caso contrário, exibe mensagem de erro
 
-### 0220-CONSULTAR
+### CONSULTAR
 - Solicita telefone e faz leitura direta (`READ`)
 - Se encontrado, exibe os dados na tela
 - Se não encontrado, exibe mensagem apropriada
 
-### 0230-ALTERAR
+### ALTERAR
 - Localiza cliente pelo telefone
 - Exibe os dados atuais e permite editar nome e e-mail
 - Solicita confirmação antes de sobrescrever (`REWRITE`)
 
-### 0240-EXCLUIR
+### EXCLUIR
 - Busca cliente pelo telefone
 - Mostra dados encontrados e solicita confirmação
 - Executa comando de exclusão (`DELETE`)
 
-### 0250-RELATORIO-TELA
+### RELATORIO-TELA
 - Percorre todo o arquivo usando `START` e `READ NEXT`
 - Exibe 5 registros por página com pausa a cada grupo
 - Mostra total de registros ao final
 
-### 0260-RELATORIO-DISCO
+### RELATORIO-DISCO
 - Similar ao relatório em tela, mas direciona a saída para `relato.txt`
 - Escreve os registros em formato texto (`WRITE` no arquivo sequencial)
 
-### 0999-FIM
+### 1000-FIM
 - Fecha todos os arquivos abertos
 - Exibe mensagem de término
 - Executa comando `STOP RUN`
@@ -174,12 +174,18 @@ O programa segue uma lógica estruturada por módulos, utilizando nomes de pará
 
 **Compilar:**
 ```sh
-cobc -x PROJETO.cbl -o PROJETO.exe
+cobc -x MAIN.cbl -o MAIN.exe
 ```
 
 **Executar:**
 ```sh
 ./PROJETO
+```
+
+**Caso utilize o CMD:**
+*Entrar na pastar "bin"*
+```sh
+MAIN.exe
 ```
 
 ### Arquivos Gerados
@@ -190,5 +196,4 @@ cobc -x PROJETO.cbl -o PROJETO.exe
 ---
 
 **Autor:** Thiago Souza  
-**Data:** 09/06/2025  
-**Versão:** 1.0  
+**Data:** 09/06/2025   
