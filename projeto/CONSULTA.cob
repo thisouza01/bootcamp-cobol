@@ -69,10 +69,11 @@
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
              PERFORM 0100-INICIALIZAR.
-             PERFORM 0220-CONSULTAR.
+             PERFORM 0220-CONSULTAR UNTIL 
+                               FUNCTION UPPER-CASE(WK-TECLA)EQUAL "X".
              PERFORM 1000-FINALIZAR.
-
-             STOP RUN.
+             
+             GOBACK.
        0000-PRINCIPAL-FIM.     EXIT.
       ******************************************************************
        0100-INICIALIZAR        SECTION.
@@ -87,26 +88,22 @@
        0220-CONSULTAR.
            MOVE "MODULO - CONSULTA " TO WK-MODULO.
            DISPLAY TELA-CONSULTA.
-           ACCEPT CHAVE.
+           ACCEPT CHAVE
       *---> LE REGISTRO
            READ CLIENTES
                INVALID KEY
-                   MOVE "CLIENTE NAO ENCONTRADO!" TO WK-ABEND-MESSAGE
+                   MOVE "CLIENTE NAO ENCONTRADO!" 
+                                               TO WK-ABEND-MESSAGE
                    ACCEPT MOSTRA-ERRO
-                   GOBACK
+                   DISPLAY TELA-CONSULTA                      
                NOT INVALID KEY
                    DISPLAY SS-DADOS
                    DISPLAY "PARA VER OUTRO APERTE 'ENTER' SENAO 'X': "
                    FOREGROUND-COLOR 2 AT 1420
                    ACCEPT WK-TECLA AT 1462
-      *---> ZERA CHAVE DE ACESSO
-                   MOVE ZEROS TO CHAVE-CLIENTES
-      *---> ZERA SS-DADOS
-                   MOVE SPACES TO REG-NOME, REG-EMAIL
-                   IF FUNCTION UPPER-CASE(WK-TECLA) EQUAL "X"
-                      GOBACK
-                   END-IF
-           END-READ.
+                   MOVE SPACES TO REG-NOME REG-EMAIL
+                   MOVE ZEROS TO CHAVE-CLIENTES                       
+           END-READ.                    
       ******************************************************************
        1000-FINALIZAR          SECTION.
            CLOSE CLIENTES.
