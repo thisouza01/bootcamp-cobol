@@ -15,7 +15,7 @@
       *
        INPUT-OUTPUT            SECTION.
        FILE-CONTROL.
-           SELECT CLIENTES ASSIGN TO "C:/projeto-bootcamp/clientes.dat"
+           SELECT CLIENTES ASSIGN TO "C:\projeto-bootcamp\clientes.dat"
                ORGANIZATION    IS INDEXED
                ACCESS MODE     IS DYNAMIC
                RECORD KEY      IS CHAVE-CLIENTES
