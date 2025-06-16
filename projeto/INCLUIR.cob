@@ -72,8 +72,6 @@
              PERFORM 0100-INICIALIZAR.
              PERFORM 0210-INCLUIR.
              PERFORM 1000-FINALIZAR.
-
-             STOP RUN.
        0000-PRINCIPAL-FIM.     EXIT.
       ******************************************************************
        0100-INICIALIZAR        SECTION.
@@ -93,7 +91,7 @@
                INVALID KEY
                    MOVE "CLIENTE JA EXISTE!" TO WK-ABEND-MESSAGE
                    ACCEPT MOSTRA-ERRO
-                   GOBACK
+                   PERFORM 1000-FINALIZAR
                NOT INVALID KEY
                    DISPLAY "CADASTRADO!" AT 1032
                    FOREGROUND-COLOR 2
@@ -102,9 +100,10 @@
                    MOVE ZEROS TO CHAVE-CLIENTES
       *---> ZERA SS-DADOS
                    MOVE SPACES TO REG-NOME, REG-EMAIL
-                   GOBACK
+                   PERFORM 1000-FINALIZAR
            END-WRITE.
       ******************************************************************
        1000-FINALIZAR          SECTION.
            CLOSE CLIENTES.
+           GOBACK.
        1000-FINALIZAR-FIM.     EXIT.
