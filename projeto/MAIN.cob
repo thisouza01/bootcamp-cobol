@@ -85,12 +85,7 @@
            05 LINE 16 COLUMN 15 VALUE "OPCAO........: ".
            05 LINE 16 COLUMN 28 USING WK-OPCAO.
       *
-       01  MOSTRA-ERRO.
-           05 MSG-ERRO.
-               10 LINE 16 COLUMN 10 FROM WK-ABEND-MESSAGE
-               FOREGROUND-COLOR 4.
-               10 COLUMN PLUS 2 PIC X(01) USING WK-TECLA.
-
+           COPY "ERROR.cpy".
       ******************************************************************
        PROCEDURE               DIVISION.
        0000-PRINCIPAL          SECTION.
